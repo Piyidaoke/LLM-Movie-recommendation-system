@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.movierecommender.mapper.MovieMapper">
+
+    <select id="findById" resultType="Movie">
+        SELECT * FROM tb_movie WHERE movie_id = #{movieId}
+    </select>
+
+    <select id="findByTmdbId" resultType="Movie">
+        SELECT * FROM tb_movie WHERE tmdb_id = #{tmdbId}
+    </select>
+
+    <select id="findAll" resultType="Movie">
+        SELECT * FROM tb_movie ORDER BY vote_average DESC
+    </select>
+
+    <select id="findByIds" resultType="Movie">
+        SELECT * FROM tb_movie WHERE movie_id IN
+        <foreach collection="movieIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="movieId">
+        INSERT INTO tb_movie (tmdb_id, title, overview, genres, director, cast_members,
+                              release_date, poster_url, vote_average, embedding_text)
+        VALUES (#{tmdbId}, #{title}, #{overview}, #{genres}, #{director}, #{castMembers},
+                #{releaseDate}, #{posterUrl}, #{voteAverage}, #{embeddingText})
+    </insert>
+
+    <insert id="batchInsert">
+        INSERT INTO tb_movie (tmdb_id, title, overview, genres, director, cast_members,
+                              release_date, poster_url, vote_average, embedding_text)
+        VALUES
+        <foreach collection="movies" item="m" separator=",">
+            (#{m.tmdbId}, #{m.title}, #{m.overview}, #{m.genres}, #{m.director}, #{m.castMembers},
+             #{m.releaseDate}, #{m.posterUrl}, #{m.voteAverage}, #{m.embeddingText})
+        </foreach>
+    </insert>
+
+    <insert id="upsert">
+        INSERT INTO tb_movie (tmdb_id, title, overview, genres, director, cast_members,
+                              release_date, poster_url, vote_average, embedding_text)
+        VALUES (#{tmdbId}, #{title}, #{overview}, #{genres}, #{director}, #{castMembers},
+                #{releaseDate}, #{posterUrl}, #{voteAverage}, #{embeddingText})
+        ON DUPLICATE KEY UPDATE
+            title = VALUES(title),
+            overview = VALUES(overview),
+            genres = VALUES(genres),
+            director = VALUES(director),
+            cast_members = VALUES(cast_members),
+            release_date = VALUES(release_date),
+            poster_url = VALUES(poster_url),
+            vote_average = VALUES(vote_average),
+            embedding_text = VALUES(embedding_text)
+    </insert>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM tb_movie
+    </select>
+</mapper>

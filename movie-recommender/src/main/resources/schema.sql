@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS tb_favorite (
 CREATE TABLE IF NOT EXISTS tb_conversation (
     conversation_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id         BIGINT       NOT NULL,
-    title           VARCHAR(200) DEFAULT '新对话',
+    title           VARCHAR(200) DEFAULT NULL,
     created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES tb_user(user_id) ON DELETE CASCADE,

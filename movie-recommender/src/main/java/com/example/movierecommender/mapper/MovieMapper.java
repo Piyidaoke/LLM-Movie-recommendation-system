@@ -14,5 +14,6 @@ public interface MovieMapper {
     int insert(Movie movie);
     int batchInsert(@Param("movies") List<Movie> movies);
     int upsert(Movie movie);
+    List<Movie> searchByTitle(@Param("keyword") String keyword);
     long count();
 }

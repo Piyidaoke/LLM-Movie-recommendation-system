@@ -5,6 +5,8 @@ import com.example.movierecommender.entity.Movie;
 import com.example.movierecommender.mapper.MovieMapper;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/movies")
 public class MovieController {
@@ -20,5 +22,10 @@ public class MovieController {
         Movie movie = movieMapper.findById(id);
         if (movie == null) throw new IllegalArgumentException("电影不存在");
         return Result.success(movie);
+    }
+
+    @GetMapping("/search")
+    public Result<List<Movie>> search(@RequestParam String keyword) {
+        return Result.success(movieMapper.searchByTitle(keyword));
     }
 }

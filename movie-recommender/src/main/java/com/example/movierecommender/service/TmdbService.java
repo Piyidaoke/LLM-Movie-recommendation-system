@@ -14,11 +14,23 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TmdbService {
 
     private static final Logger log = LoggerFactory.getLogger(TmdbService.class);
+
+    // TMDB genre ID -> 中文名称映射
+    private static final Map<Integer, String> GENRE_MAP = Map.ofEntries(
+            Map.entry(28, "动作"), Map.entry(12, "冒险"), Map.entry(16, "动画"),
+            Map.entry(35, "喜剧"), Map.entry(80, "犯罪"), Map.entry(99, "纪录片"),
+            Map.entry(18, "剧情"), Map.entry(10751, "家庭"), Map.entry(14, "奇幻"),
+            Map.entry(36, "历史"), Map.entry(27, "恐怖"), Map.entry(10402, "音乐"),
+            Map.entry(9648, "悬疑"), Map.entry(10749, "爱情"), Map.entry(878, "科幻"),
+            Map.entry(10770, "电视电影"), Map.entry(53, "惊悚"), Map.entry(10752, "战争"),
+            Map.entry(37, "西部")
+    );
 
     @Value("${app.tmdb.api-key}")
     private String apiKey;
@@ -31,7 +43,6 @@ public class TmdbService {
 
     private HttpHeaders buildHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(apiKey);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         return headers;
     }
@@ -39,7 +50,8 @@ public class TmdbService {
     public List<Movie> fetchMoviesByYear(int year, int maxPages) {
         List<Movie> movies = new ArrayList<>();
         for (int page = 1; page <= maxPages; page++) {
-            String url = baseUrl + "/discover/movie?language=zh-CN&sort_by=popularity.desc"
+            String url = baseUrl + "/discover/movie?api_key=" + apiKey
+                    + "&language=zh-CN&sort_by=popularity.desc"
                     + "&primary_release_year=" + year + "&page=" + page;
             try {
                 ResponseEntity<String> resp = restTemplate.exchange(
@@ -64,7 +76,7 @@ public class TmdbService {
     }
 
     public void enrichCredits(Movie movie) {
-        String url = baseUrl + "/movie/" + movie.getTmdbId() + "/credits?language=zh-CN";
+        String url = baseUrl + "/movie/" + movie.getTmdbId() + "/credits?api_key=" + apiKey + "&language=zh-CN";
         try {
             ResponseEntity<String> resp = restTemplate.exchange(
                     url, HttpMethod.GET, new HttpEntity<>(buildHeaders()), String.class);
@@ -109,11 +121,15 @@ public class TmdbService {
             try { movie.setReleaseDate(LocalDate.parse(releaseDateStr)); } catch (Exception ignored) {}
         }
 
+        // 将 genre ID 转换为中文名称
         JsonNode genreIds = node.get("genre_ids");
         if (genreIds != null) {
-            List<Integer> ids = new ArrayList<>();
-            genreIds.forEach(g -> ids.add(g.asInt()));
-            try { movie.setGenres(objectMapper.writeValueAsString(ids)); } catch (Exception ignored) {}
+            List<String> genreNames = new ArrayList<>();
+            for (JsonNode g : genreIds) {
+                String name = GENRE_MAP.get(g.asInt());
+                if (name != null) genreNames.add(name);
+            }
+            movie.setGenres(String.join("/", genreNames));
         }
 
         return movie;

@@ -56,6 +56,10 @@
             embedding_text = VALUES(embedding_text)
     </insert>
 
+    <select id="searchByTitle" resultType="Movie">
+        SELECT * FROM tb_movie WHERE title LIKE CONCAT('%', #{keyword}, '%') LIMIT 10
+    </select>
+
     <select id="count" resultType="long">
         SELECT COUNT(*) FROM tb_movie
     </select>

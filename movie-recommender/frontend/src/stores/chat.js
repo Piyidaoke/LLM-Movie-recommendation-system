@@ -6,6 +6,7 @@ export const useChatStore = defineStore('chat', () => {
   const conversations = ref([])
   const currentConversationId = ref(null)
   const messages = ref([])
+  const recommendedMovies = ref([])
 
   async function loadConversations() {
     const res = await http.get('/conversations')
@@ -16,6 +17,7 @@ export const useChatStore = defineStore('chat', () => {
     currentConversationId.value = conversationId
     const res = await http.get(`/conversations/${conversationId}/messages`)
     messages.value = res.data
+    recommendedMovies.value = []
   }
 
   async function deleteConversation(id) {
@@ -24,6 +26,7 @@ export const useChatStore = defineStore('chat', () => {
     if (currentConversationId.value === id) {
       currentConversationId.value = null
       messages.value = []
+      recommendedMovies.value = []
     }
   }
 
@@ -38,9 +41,13 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
+  function setRecommendedMovies(movies) {
+    recommendedMovies.value = movies
+  }
+
   return {
-    conversations, currentConversationId, messages,
+    conversations, currentConversationId, messages, recommendedMovies,
     loadConversations, loadMessages, deleteConversation,
-    addMessage, appendToLastAssistant
+    addMessage, appendToLastAssistant, setRecommendedMovies
   }
 })

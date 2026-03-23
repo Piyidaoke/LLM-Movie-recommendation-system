@@ -52,6 +52,9 @@ public class DataIngestionService {
         List<Document> documents = new ArrayList<>();
 
         for (Movie movie : movies) {
+            // 重新生成 embedding text（确保用最新格式）
+            tmdbService.buildEmbeddingText(movie);
+            movieMapper.upsert(movie);
             if (movie.getEmbeddingText() == null || movie.getEmbeddingText().isEmpty()) continue;
 
             Map<String, Object> metadata = new HashMap<>();
@@ -64,7 +67,7 @@ public class DataIngestionService {
             documents.add(doc);
         }
 
-        int batchSize = 100;
+        int batchSize = 10;
         for (int i = 0; i < documents.size(); i += batchSize) {
             List<Document> batch = documents.subList(i, Math.min(i + batchSize, documents.size()));
             vectorStore.add(batch);

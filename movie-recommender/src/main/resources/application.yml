@@ -2,10 +2,15 @@ server:
   port: 8080
 
 spring:
+  profiles:
+    # 本地开发走 application-local.yml（已在 .gitignore 中，不提交）
+    # 部署时用 --spring.profiles.active=prod 覆盖，并直接注入环境变量
+    active: local
+
   datasource:
     url: jdbc:mysql://localhost:3306/movie_recommender?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     username: root
-    password: REDACTED
+    password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   data:
@@ -16,7 +21,7 @@ spring:
   ai:
     openai:
       base-url: https://api.deepseek.com
-      api-key: REDACTED
+      api-key: ${DEEPSEEK_API_KEY}
       chat:
         options:
           model: deepseek-chat
@@ -38,12 +43,12 @@ mybatis:
 
 app:
   jwt:
-    secret: REDACTED
+    secret: ${JWT_SECRET}
     expiration-ms: 86400000
   tmdb:
-    api-key: REDACTED
+    api-key: ${TMDB_API_KEY}
     base-url: https://api.themoviedb.org/3
   embedding:
-    api-key: REDACTED
+    api-key: ${DASHSCOPE_API_KEY}
     base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
     model: text-embedding-v4

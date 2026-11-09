@@ -15,10 +15,16 @@ target/
 node_modules/
 dist/
 
-# Env
+# Env —— 真实配置永远不进仓库
 .env
+.env.*
+!.env.example
+application-local.yml
 *.log
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Obsidian
+.obsidian/
